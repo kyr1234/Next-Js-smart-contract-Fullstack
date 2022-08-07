@@ -1,19 +1,24 @@
 const Moralis = require('moralis/node')
 require('dotenv').config()
-const contractaddresses = require('./constants/contract.json')
-const chainId = process.env.chainId || 31337
-const contractaddress = contractaddresses[chainId]['NftMarketplace']
-const serverurl = process.env.NEXT_PUBLIC_SERVER_URL
-const appid = process.env.NEXT_PUBLIC_APP_ID
-const masterkey = process.env.masterkey
-const moralischainid = chainId == '31337' ? '1337' : chainId
-const main = async () => {
-  await Moralis.start({ serverurl, appid, masterkey })
+const contractAddresses = require('./constants/contract.json')
+let chainId = process.env.chainId || 31337
+let moralischainid = chainId == '31337' ? '1337' : chainId
+const contractAddressArray = contractAddresses[chainId]['NftMarketplace']
+const contractAddress = contractAddressArray[contractAddressArray.length - 1]
+
+const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL
+const appId = process.env.NEXT_PUBLIC_APP_ID
+const masterKey = process.env.masterKey
+
+async function main() {
+  await Moralis.start({ serverUrl, appId, masterKey })
+  console.log(`Working with contrat address ${contractAddress}`)
 
   const itemListed = {
     chainId: moralischainid,
     sync_historical: true,
     topic: 'Item_Listed(address,uint256,uint256,,address)',
+    address: contractAddress,
     abi: {
       anonymous: false,
       inputs: [
@@ -45,13 +50,15 @@ const main = async () => {
       name: 'Item_Listed',
       type: 'event',
     },
-    tableName: 'ITEM_LISTED_MARKETPLACE',
+    limit: 500000,
+    tableName: 'ITEMLISTED',
   }
 
   const Items_Bought = {
     chainId: moralischainid,
     sync_historical: true,
     topic: 'Item_Bought_OwnerShip_Transfer(address,address,uint256,uint256)',
+    address: contractAddress,
     abi: {
       anonymous: false,
       inputs: [
@@ -83,13 +90,15 @@ const main = async () => {
       name: 'Item_Bought_OwnerShip_Transfer',
       type: 'event',
     },
-    tableName: 'ITEMS_BOUGHT',
+    limit: 500000,
+    tableName: 'ITEMSBOUGHT',
   }
 
   const Cancel_Listed = {
     chainId: moralischainid,
     sync_historical: true,
     topic: 'Cancel_Listed(address,uint256,address)',
+    address: contractAddress,
     abi: {
       anonymous: false,
       inputs: [
@@ -115,39 +124,48 @@ const main = async () => {
       name: 'Cancel_Listed',
       type: 'event',
     },
-    tableName: 'ITEMS_CANCEL',
+    tableName: 'ITEMSCANCEL',
+    limit: 500000,
   }
 
-  const itemlisted = await Moralis.Cloud.run('watchContractEvent', itemListed, {
-    useMasterKey: true,
-  })
-  const itemsbought = await Moralis.Cloud.run(
+  const listedResponse = await Moralis.Cloud.run(
+    'watchContractEvent',
+    itemListed,
+    {
+      useMasterKey: true,
+    },
+  )
+  const boughtResponse = await Moralis.Cloud.run(
     'watchContractEvent',
     Items_Bought,
     {
       useMasterKey: true,
     },
   )
-  const cancellist = await Moralis.Cloud.run(
+  const canceledResponse = await Moralis.Cloud.run(
     'watchContractEvent',
     Cancel_Listed,
     {
       useMasterKey: true,
     },
   )
-
-  if (itemsbought.success && itemListed.success && cancellist.success) {
-    console.log('THE TABLE WITH EVENT IS BEEN ADDED TO MORALIS')
+  console.log(listedResponse)
+  console.log(canceledResponse.success)
+  console.log(boughtResponse.success)
+  if (
+    listedResponse.success &&
+    canceledResponse.success &&
+    boughtResponse.success
+  ) {
+    console.log('Success! Database Updated with watching events')
   } else {
-    console.log('SOMETHING WENT WRONG')
+    console.log('Something went wrong...')
   }
 }
 
 main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch((e) => {
-    console.log(e)
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
     process.exit(1)
   })
