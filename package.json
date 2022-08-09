@@ -4,7 +4,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "moralis:sync": "moralis-admin-cli connect-local-devchain --chain hardhat --moralisSubdomain zu1lw0y7ln02.usemoralis.com --frpcPath ./frp/frpc"
+    "moralis:sync": "moralis-admin-cli connect-local-devchain --chain hardhat --moralisSubdomain jwrbappuafwu.usemoralis.com --frpcPath ./frp/frpc",
+    "moralis:cloud": "moralis-admin-cli watch-cloud-folder  --moralisSubdomain jwrbappuafwu.usemoralis.com --autoSave 1 --moralisCloudfolder ./cloud-functions"
   },
   "dependencies": {
     "@walletconnect/web3-provider": "^1.7.8",
@@ -16,6 +17,7 @@
     "magic-sdk": "^8.1.1",
     "moment": "^2.29.3",
     "moralis": "^1.7.0",
+    "moralis-admin-cli": "^2.1.16",
     "next": "latest",
     "react": "^18.1.0",
     "react-chartjs-2": "^4.1.0",
