@@ -1,11 +1,24 @@
 import { useState, useEffect } from 'react'
 import { useWeb3Contract, useMoralis } from 'react-moralis'
-import nftMarketplaceAbi from '../constants/NftMarketplace.json'
 import nftAbi from '../constants/BasicNft.json'
 import Image from 'next/image'
 import { Card, useNotification } from 'web3uikit'
 import { ethers } from 'ethers'
+import UpdateModal from './UpdateModal'
+const truncate = (fullstr, strlen) => {
+  if (fullstr.length <= strlen) return fullstr
 
+  const seprator = '...'
+  const sepratorlength = seprator.length
+  const charlength = strlen - sepratorlength
+  const frontcharslength = charlength / 2
+  const backcharlength = charlength / 2
+  return (
+    fullstr.substring(0, frontcharslength) +
+    seprator +
+    fullstr.substring(fullstr.length - backcharlength)
+  )
+}
 export default function NFTBox({
   price,
   nftAddress,
@@ -17,8 +30,8 @@ export default function NFTBox({
   const [imageURI, setImageURI] = useState('')
   const [tokenName, setTokenName] = useState('')
   const [tokenDescription, setTokenDescription] = useState('')
-
-  const { runContractFunction: getTokenURI } = useWeb3Contract({
+  const [showModal, setModal] = useState(false)
+  const { runContractFunction: tokenURI } = useWeb3Contract({
     abi: nftAbi,
     contractAddress: nftAddress,
     functionName: 'tokenURI',
@@ -27,10 +40,22 @@ export default function NFTBox({
     },
   })
 
+  const OwnedByuser = seller === account || seller === undefined
+  const formattedseller = OwnedByuser ? 'You' : truncate(seller, 15)
+
+  const handleClickOnCard = () => {
+    OwnedByuser ? setModal(true) : console.log('Buy Item')
+  }
+
+  const OnClose = () => {
+    setModal(false)
+  }
+
   async function updateUI() {
     const tokenURI =
       'ipfs://bafybeig37ioir76s7mg5oobetncojcm3c3hxasyd4rvid4jqhy4gkaheg4/?filename=0-PUG.json'
     console.log(`The TokenURI is ${tokenURI}`)
+
     // We are going to cheat a little here...
     if (tokenURI) {
       // IPFS Gateway: A server that will return IPFS files from a "normal" URL.
@@ -61,11 +86,24 @@ export default function NFTBox({
       <div>
         {imageURI ? (
           <div>
-            <Card title={tokenName} description={tokenDescription}>
+            <UpdateModal
+              isVisible={showModal}
+              OnClose={OnClose}
+              marketplaceAddress={marketplaceAddress}
+              tokenId={tokenId}
+              nftAddress={nftAddress}
+            />
+            <Card
+              title={tokenName}
+              description={tokenDescription}
+              onClick={handleClickOnCard}
+            >
               <div className="p-2">
                 <div className="flex flex-col items-end gap-2">
                   <div>#{tokenId}</div>
-                  <div className="italic text-sm">Owned by {seller}</div>
+                  <div className="italic text-sm">
+                    Owned by {formattedseller}
+                  </div>
                   <Image
                     loader={() => imageURI}
                     src={imageURI}
