@@ -21,35 +21,35 @@ async function main() {
     topic: 'ItemListed(address,address,uint256,uint256)',
     address: contractAddress,
     abi: {
-      anonymous: false,
-      inputs: [
+          "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'seller',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "nftAddress",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'nftAddress',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "seller",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: 'uint256',
-          name: 'tokenId',
-          type: 'uint256',
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
         },
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'price',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        }
       ],
-      name: 'ItemListed',
-      type: 'event',
+      "name": "ItemListed",
+      "type": "event"
     },
     tableName: 'ItemListed',
   }
