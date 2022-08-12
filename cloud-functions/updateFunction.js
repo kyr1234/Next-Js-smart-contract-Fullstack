@@ -14,7 +14,7 @@ Moralis.Cloud.afterSave("ItemListed", async (request) => {
         query.equalTo("tokenId", request.object.get("tokenId"))
         query.equalTo("marketplaceAddress", request.object.get("address"))
         query.equalTo("seller", request.object.get("seller"))
-        logger.info(`Marketplace | Query: ${query}`)
+        logger.info(`Marketplace | Query: ${query.first()}`)
         const alreadyListedItem = await query.first()
         console.log(`alreadyListedItem ${JSON.stringify(alreadyListedItem)}`);
         if (alreadyListedItem) {
